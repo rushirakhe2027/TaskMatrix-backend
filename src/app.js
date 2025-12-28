@@ -10,6 +10,7 @@ const app = express();
 // Middleware
 app.use(helmet({
     crossOriginResourcePolicy: false,
+    contentSecurityPolicy: false,
 }));
 app.use(cors({
     origin: process.env.CLIENT_URL || 'http://localhost:5173',

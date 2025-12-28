@@ -24,7 +24,7 @@ exports.sendMessage = async (req, res) => {
         const message = await Message.create(messageData);
 
         // Populate sender info for the frontend
-        const populatedMessage = await Message.findById(message._id).populate('sender', 'name avatar');
+        const populatedMessage = await Message.findById(message._id).populate('sender', 'name photo avatar');
 
         // Socket logic for real-time delivery
         if (global.io) {
@@ -50,7 +50,7 @@ exports.getMessages = async (req, res) => {
                 { sender: otherUserId, recipient: req.user._id }
             ]
         })
-            .populate('sender', 'name avatar')
+            .populate('sender', 'name photo avatar')
             .sort('createdAt');
 
         res.status(200).json({ status: 'success', results: messages.length, data: { messages } });
@@ -62,9 +62,13 @@ exports.getMessages = async (req, res) => {
 exports.getConversations = async (req, res) => {
     try {
         // Find all unique users the current user has chatted with
+        // Find all unique users the current user has chatted with
         const messages = await Message.find({
             $or: [{ sender: req.user._id }, { recipient: req.user._id }]
-        }).sort('-createdAt');
+        })
+            .sort('-createdAt')
+            .populate('sender', 'name photo avatar')
+            .populate('recipient', 'name photo avatar');
 
         const conversationPartners = new Set();
         const latestMessages = [];

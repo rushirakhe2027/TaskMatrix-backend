@@ -33,7 +33,10 @@ const createSendToken = async (user, statusCode, res) => {
 
 exports.signup = async (req, res) => {
     try {
-        const avatar = req.file ? `http://localhost:5000/img/users/${req.file.filename}` : '';
+        if (req.file && !req.file.filename) {
+            req.file.filename = `user-${Date.now()}.jpeg`; // Manual filename for Vercel
+        }
+        const avatar = req.file ? `https://task-matrix-backend.vercel.app/img/users/${req.file.filename}` : '';
         const newUser = await User.create({
             name: req.body.name,
             email: req.body.email,

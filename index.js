@@ -38,7 +38,16 @@ const connectDB = async () => {
 
 // Vercel Handler
 module.exports = async (req, res) => {
-    await connectDB();
-    // Forward to Express App
-    return app(req, res);
+    try {
+        await connectDB();
+        // Forward to Express App
+        return app(req, res);
+    } catch (error) {
+        console.error("Vercel Function Error:", error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Serverless Function Crashed',
+            error: error.message
+        });
+    }
 };

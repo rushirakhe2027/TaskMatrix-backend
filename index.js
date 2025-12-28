@@ -47,7 +47,12 @@ module.exports = async (req, res) => {
         res.status(500).json({
             status: 'error',
             message: 'Serverless Function Crashed',
-            error: error.message
+            error: error.message,
+            stack: error.stack,
+            env_check: {
+                HAS_MONGO: !!process.env.MONGO_URI,
+                HAS_JWT: !!process.env.JWT_SECRET
+            }
         });
     }
 };

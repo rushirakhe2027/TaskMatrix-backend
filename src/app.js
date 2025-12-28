@@ -8,14 +8,18 @@ const compression = require('compression');
 const app = express();
 
 // Middleware
-app.use(helmet({
-    crossOriginResourcePolicy: false,
-    contentSecurityPolicy: false,
-}));
+// app.use(helmet({
+//     crossOriginResourcePolicy: false,
+//     contentSecurityPolicy: false,
+// }));
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: [process.env.CLIENT_URL || 'http://localhost:5173', 'https://task-matrix-seven.vercel.app'],
     credentials: true,
 }));
+
+app.get('/', (req, res) => {
+    res.status(200).send('TaskMatrix API is Running');
+});
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -6,8 +6,8 @@ const signToken = (id, secret, expires) => {
 };
 
 const createSendToken = async (user, statusCode, res) => {
-    const token = signToken(user._id, process.env.JWT_SECRET, process.env.JWT_EXPIRES_IN || '90d');
-    const refreshToken = signToken(user._id, process.env.JWT_REFRESH_SECRET, process.env.JWT_REFRESH_EXPIRES_IN || '90d');
+    const token = signToken(user._id, process.env.JWT_SECRET || 'fallback_secret_key', process.env.JWT_EXPIRES_IN || '90d');
+    const refreshToken = signToken(user._id, process.env.JWT_REFRESH_SECRET || 'fallback_refresh_secret', process.env.JWT_REFRESH_EXPIRES_IN || '90d');
 
     // Store refresh token in user
     user.refreshTokens.push(refreshToken);

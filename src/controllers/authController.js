@@ -33,15 +33,19 @@ const createSendToken = async (user, statusCode, res) => {
 
 exports.signup = async (req, res) => {
     try {
-        if (req.file && !req.file.filename) {
-            req.file.filename = `user-${Date.now()}.jpeg`; // Manual filename for Vercel
+        let photo = 'default.jpg';
+        if (req.file) {
+            const b64 = req.file.buffer.toString('base64');
+            const mime = req.file.mimetype;
+            photo = `data:${mime};base64,${b64}`;
         }
-        const avatar = req.file ? `https://task-matrix-backend.vercel.app/img/users/${req.file.filename}` : '';
+
         const newUser = await User.create({
             name: req.body.name,
             email: req.body.email,
             password: req.body.password,
-            avatar,
+            photo: photo,
+            avatar: photo,
         });
 
         await createSendToken(newUser, 201, res);

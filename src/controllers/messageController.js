@@ -10,9 +10,13 @@ exports.sendMessage = async (req, res) => {
         };
 
         if (req.file) {
+            const b64 = req.file.buffer.toString('base64');
+            const mime = req.file.mimetype;
+            const dataUri = `data:${mime};base64,${b64}`;
+
             messageData.attachments = [{
                 name: req.file.originalname,
-                url: req.file.filename,
+                url: dataUri,
                 fileType: req.file.mimetype,
             }];
         }

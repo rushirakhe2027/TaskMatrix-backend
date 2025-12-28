@@ -13,7 +13,11 @@ exports.updateMe = async (req, res) => {
     try {
         // 1) Filter out unwanted field names that are not allowed to be updated
         const filteredBody = { ...req.body };
-        if (req.file) filteredBody.photo = req.file.filename;
+        if (req.file) {
+            const b64 = req.file.buffer.toString('base64');
+            const mime = req.file.mimetype;
+            filteredBody.photo = `data:${mime};base64,${b64}`;
+        }
 
         delete filteredBody.password;
         delete filteredBody.role;

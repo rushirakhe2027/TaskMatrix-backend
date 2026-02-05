@@ -61,34 +61,42 @@ exports.getAllProjects = async (req, res) => {
     const projects = await Project.find({
       "members.user": req.user._id,
       status: "active",
-    })
-      .populate("owner", "name email avatar")
-      .lean();
+    }).populate("owner", "name email avatar");
+
+    if (!projects || projects.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        results: 0,
+        data: { projects: [] },
+      });
+    }
 
     // Add task counts for each project
-    const tasks = await Task.find({
+    const allTasks = await Task.find({
       project: { $in: projects.map((p) => p._id) },
-    });
+    }).select("project status");
 
-    const projectsWithStats = projects.map((p) => {
-      const projectTasks = tasks.filter(
-        (t) => t.project.toString() === p._id.toString(),
+    const projectsWithStats = projects.map((project) => {
+      const projectObj = project.toObject();
+      const projectTasks = allTasks.filter(
+        (t) => t.project.toString() === project._id.toString(),
       );
-      return {
-        ...p,
-        totalTasks: projectTasks.length,
-        completedTasks: projectTasks.filter((t) => t.status === "done").length,
-      };
+
+      projectObj.totalTasks = projectTasks.length;
+      projectObj.completedTasks = projectTasks.filter(
+        (t) => t.status === "done",
+      ).length;
+
+      return projectObj;
     });
 
-    res
-      .status(200)
-      .json({
-        status: "success",
-        results: projectsWithStats.length,
-        data: { projects: projectsWithStats },
-      });
+    res.status(200).json({
+      status: "success",
+      results: projectsWithStats.length,
+      data: { projects: projectsWithStats },
+    });
   } catch (err) {
+    console.error("GET ALL PROJECTS ERROR:", err);
     res.status(400).json({ status: "fail", message: err.message });
   }
 };
@@ -97,16 +105,16 @@ exports.getProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id)
       .populate("members.user", "name email avatar")
-      .populate("owner", "name email avatar")
-      .lean();
+      .populate("owner", "name email avatar");
 
     if (!project) return res.status(404).json({ message: "Project not found" });
 
-    const tasks = await Task.find({ project: project._id });
-    project.totalTasks = tasks.length;
-    project.completedTasks = tasks.filter((t) => t.status === "done").length;
+    const tasks = await Task.find({ project: project._id }).select("status");
+    const projectObj = project.toObject();
+    projectObj.totalTasks = tasks.length;
+    projectObj.completedTasks = tasks.filter((t) => t.status === "done").length;
 
-    res.status(200).json({ status: "success", data: { project } });
+    res.status(200).json({ status: "success", data: { project: projectObj } });
   } catch (err) {
     res.status(400).json({ status: "fail", message: err.message });
   }

@@ -1,5 +1,6 @@
 const Task = require('../models/Task');
 const Notification = require('../models/Notification');
+const Project = require('../models/Project');
 
 exports.createTask = async (req, res) => {
     try {
@@ -120,10 +121,16 @@ exports.deleteTask = async (req, res) => {
 
 exports.getMyTasks = async (req, res) => {
     try {
-        const tasks = await Task.find({ assignees: req.user._id })
+        // Find all projects where the user is a member
+        const userProjects = await Project.find({ 'members.user': req.user._id });
+        const projectIds = userProjects.map(p => p._id);
+
+        // Find all tasks in those projects
+        const tasks = await Task.find({ project: { $in: projectIds } })
             .populate('project', 'name')
             .populate('assignees', 'name email avatar')
             .sort('-createdAt');
+            
         res.status(200).json({ status: 'success', results: tasks.length, data: { tasks } });
     } catch (err) {
         res.status(400).json({ status: 'fail', message: err.message });

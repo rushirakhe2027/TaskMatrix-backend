@@ -13,7 +13,12 @@ const server = http.createServer(app);
 // Socket.IO Setup
 const io = new Server(server, {
     cors: {
-        origin: [process.env.CLIENT_URL || 'http://localhost:5173', 'https://task-matrix-seven.vercel.app'],
+        origin: [
+            process.env.CLIENT_URL,
+            'http://localhost:5173',
+            'http://localhost:3000',
+            'https://task-matrix-seven.vercel.app'
+        ].filter(Boolean),
         methods: ['GET', 'POST'],
         credentials: true,
     }

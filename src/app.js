@@ -13,7 +13,12 @@ const app = express();
 //     contentSecurityPolicy: false,
 // }));
 app.use(cors({
-    origin: [process.env.CLIENT_URL || 'http://localhost:5173', 'https://task-matrix-seven.vercel.app'],
+    origin: [
+        process.env.CLIENT_URL,
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'https://task-matrix-seven.vercel.app'
+    ].filter(Boolean),
     credentials: true,
 }));
 

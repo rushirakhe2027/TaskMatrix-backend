@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Project = require('./src/models/Project');
 const User = require('./src/models/User');
 require('dotenv').config();
 
@@ -9,15 +8,10 @@ const testDB = async () => {
     console.log('Connected to MongoDB');
 
     const users = await User.find({});
-    console.log('--- USERS ---');
-    users.forEach(u => console.log(`${u._id} - ${u.email} - ${u.name}`));
-
-    const projects = await Project.find({});
-    console.log('\n--- PROJECTS ---');
-    projects.forEach(p => {
-      console.log(`\nProject: ${p.name}`);
-      console.log(`Status: ${p.status}`);
-      console.log(`Members: ${JSON.stringify(p.members, null, 2)}`);
+    users.forEach(u => {
+      console.log(`User: ${u.name} (${u.email})`);
+      console.log(`  Total Rev: ${u.totalRevenue}`);
+      console.log(`  Received: ${u.receivedRevenue}`);
     });
 
     process.exit(0);

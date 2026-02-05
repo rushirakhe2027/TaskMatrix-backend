@@ -121,8 +121,13 @@ exports.deleteTask = async (req, res) => {
 
 exports.getMyTasks = async (req, res) => {
     try {
-        // Find all projects where the user is a member
-        const userProjects = await Project.find({ 'members.user': req.user._id });
+        // Find all projects where the user is a member OR owner
+        const userProjects = await Project.find({
+            $or: [
+                { owner: req.user._id },
+                { 'members.user': req.user._id }
+            ]
+        });
         const projectIds = userProjects.map(p => p._id);
 
         // Find all tasks in those projects

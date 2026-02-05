@@ -58,14 +58,10 @@ exports.createProject = async (req, res) => {
 
 exports.getAllProjects = async (req, res) => {
   try {
-    console.log("Fetching projects for User ID:", req.user._id);
-    
     const projects = await Project.find({
-      "members.user": req.user._id,
-      status: { $in: ["active", "completed"] },
+      $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
+      status: { $ne: "deleted" },
     }).populate("owner", "name email avatar");
-
-    console.log(`Found ${projects.length} raw projects`);
 
     if (!projects || projects.length === 0) {
       return res.status(200).json({
@@ -75,17 +71,15 @@ exports.getAllProjects = async (req, res) => {
       });
     }
 
-    // Add task counts for each project
+    const projectIds = projects.map((p) => p._id);
     const allTasks = await Task.find({
-      project: { $in: projects.map((p) => p._id) },
+      project: { $in: projectIds },
     }).select("project status");
-
-    console.log(`Found ${allTasks.length} tasks matching projects`);
 
     const projectsWithStats = projects.map((project) => {
       const projectObj = project.toObject();
       const projectTasks = allTasks.filter(
-        (t) => t.project.toString() === project._id.toString(),
+        (t) => t.project?.toString() === project._id.toString(),
       );
 
       projectObj.totalTasks = projectTasks.length;

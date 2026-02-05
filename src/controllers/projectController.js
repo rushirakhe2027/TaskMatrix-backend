@@ -58,10 +58,14 @@ exports.createProject = async (req, res) => {
 
 exports.getAllProjects = async (req, res) => {
   try {
+    console.log("Fetching projects for User ID:", req.user._id);
+    
     const projects = await Project.find({
       "members.user": req.user._id,
-      status: "active",
+      status: { $in: ["active", "completed"] },
     }).populate("owner", "name email avatar");
+
+    console.log(`Found ${projects.length} raw projects`);
 
     if (!projects || projects.length === 0) {
       return res.status(200).json({
@@ -75,6 +79,8 @@ exports.getAllProjects = async (req, res) => {
     const allTasks = await Task.find({
       project: { $in: projects.map((p) => p._id) },
     }).select("project status");
+
+    console.log(`Found ${allTasks.length} tasks matching projects`);
 
     const projectsWithStats = projects.map((project) => {
       const projectObj = project.toObject();

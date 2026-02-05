@@ -1,6 +1,7 @@
 const Project = require("../models/Project");
 const Board = require("../models/Board");
 const User = require("../models/User");
+const Task = require("../models/Task");
 
 const updateUserRevenue = async (userId) => {
   const projects = await Project.find({
